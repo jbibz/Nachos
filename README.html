@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe Biby's Portfolio</title>
+    
+    <!-- Tailwind CSS for utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Feather Icons for social links -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+        /*
+         * ===================================================================
+         * --- CUSTOM STYLES & CONFIGURATION ---
+         * ===================================================================
+         */
+
+        /* * --- COLOR PALETTE --- 
+         * Change these values to easily customize the site's colors.
+         */
+        :root {
+            /* Core Colors */
+            --bg-color: #fefcf9;            /* Main background color */
+            --text-color: #1e1e1e;          /* Main text color */
+            --border-color: #1e1e1e;        /* Border and shadow color for cards */
+
+            /* Gradient & Primary Accent Colors */
+            --gradient-start: #ff9a55;      /* Orange - Used for gradients, buttons */
+            --gradient-end: #38b2ac;        /* Teal - Used for gradients, icons */
+            
+            /* Accent Colors for backgrounds, tags, etc. */
+            --accent-yellow: #fef08a;       /* yellow-200 */
+            --accent-green: #dcfce7;        /* green-100 */
+            --accent-pink: #fecaca;         /* red-200 */
+            --accent-blue: #dbeafe;         /* blue-100 */
+            --accent-orange: #ffedd5;       /* orange-100 */
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Custom Typography --- */
+        .font-scribble {
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            font-weight: 700;
+        }
+        
+        /* --- Gradient Text --- */
+        .gradient-text {
+            background-image: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* --- Main Card/Element Style --- */
+        .scribble-card {
+            border: 3px solid var(--border-color);
+            border-radius: 1rem;
+            background-color: white;
+            box-shadow: 8px 8px 0 var(--border-color);
+            transition: all 0.2s ease-in-out;
+        }
+        .scribble-card:not(.non-interactive):hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0 var(--border-color);
+        }
+        
+        /* --- Custom Button Style --- */
+        .scribble-button {
+            border: 3px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 4px 4px 0 var(--border-color);
+            display: inline-block;
+        }
+        .scribble-button:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--border-color);
+        }
+        .scribble-button-primary {
+            background-image: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+        }
+        .scribble-button-secondary {
+            background-color: white;
+            color: var(--text-color);
+        }
+        
+        /* --- Form Input Style --- */
+        .scribble-input {
+            border: 3px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .scribble-input:focus {
+            outline: none;
+            box-shadow: 4px 4px 0 var(--border-color);
+        }
+
+        /* --- Small decoration element --- */
+        .scribble-tag {
+            display: inline-block;
+            border: 2px solid var(--border-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        /* --- Experience List Style --- */
+        .experience-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 8px;
+        }
+        .experience-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--gradient-end);
+            font-weight: bold;
+        }
+
+        /* --- Colorful hover for footer icons --- */
+        .footer-icon:hover {
+            color: var(--gradient-end);
+            transform: scale(1.1);
+        }
+
+        /* --- TABBED SKILLS SECTION STYLES --- */
+        .skill-tab {
+            border: 3px solid var(--border-color);
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+            background-color: white;
+            cursor: pointer;
+        }
+        .skill-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0 var(--border-color);
+        }
+        .skill-tab.active {
+            background-image: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            box-shadow: 4px 4px 0 var(--border-color);
+        }
+
+        /* -- FIX for Tab Content Height -- */
+        .skills-container {
+            display: grid;
+        }
+        .skill-content {
+            /* This makes all tab content stack in the same grid cell */
+            grid-area: 1 / 1 / -1 / -1;
+            /* Control visibility with opacity instead of display for smooth transitions */
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s;
+            /* Layout styles that were here before */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+        .skill-content.active {
+            /* Show the active tab */
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+        }
+        /* -- END of FIX -- */
+
+        .proficiency-tag {
+            display: inline-block;
+            padding: 0.1rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .proficiency-advanced { background-color: var(--accent-green); color: #15803d; }
+        .proficiency-proficient { background-color: var(--accent-blue); color: #1d4ed8; }
+        
+        /* --- MY STORY SECTION STYLES --- */
+        .story-icon-list-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .story-icon-bg {
+            background-color: #ffedd5; /* orange-100 */
+            border-radius: 9999px;
+            padding: 0.5rem;
+            display: inline-flex;
+            color: #f97316; /* orange-500 */
+        }
+        
+        /* --- NEW SCROLLING EXPERIENCE CARD STYLES --- */
+        #experience {
+            padding-bottom: 0px;
+        }
+        .Content__wrapper {
+          margin-bottom: 3rem;
+          perspective: 10000px;
+        }
+        .Content__wrapper:last-child {
+          margin-bottom: 0;
+        }
+        .Content__slide {
+          padding: 3rem 2.5rem;
+          border: 3px solid var(--border-color);
+          border-radius: 1.5rem; /* Slightly larger radius */
+          box-shadow: 8px 8px 0 var(--border-color);
+        }
+        .card-bg-1 { background-color: var(--accent-green); }
+        .card-bg-2 { background-color: var(--accent-orange); }
+        .card-bg-3 { background-color: var(--accent-blue); }
+        .card-bg-4 { background-color: var(--accent-pink); }
+
+        @media (min-width: 1200px) {
+          .Content__slide {
+            height: 90vh;
+            max-height: 400px;
+            transform-style: preserve-3d;
+          }
+        }
+        /* Fallback for smaller screens */
+        @media (max-width: 1199.98px) {
+            .Content__inner {
+                display: flex;
+                flex-direction: column;
+                gap: 3rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-6 md:px-10 py-12">
+
+        <!-- =================================================================== -->
+        <!-- START HERO SECTION -->
+        <!-- =================================================================== -->
+        <header class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center py-16">
+            <div class="lg:col-span-2 text-center lg:text-left">
+                <!-- EDIT HERO CONTENT HERE -->
+                <span class="scribble-tag bg-yellow-200">Not Your Average Joe!</span>
+                <h1 class="font-scribble text-5xl md:text-7xl mt-4">Cyber Security Student | Entrepreneur</h1>
+                <p class="mt-6 text-lg text-gray-700 max-w-xl mx-auto lg:mx-0">
+                    Resourceful IT professional passionate about leveraging technical solutions for operational efficiency. Seeking to apply hands-on administration, system management, and data analysis skills.
+                </p>
+                <div class="mt-8 flex justify-center lg:justify-start gap-4">
+                    <a href="#experience" class="scribble-button scribble-button-primary">View My Experience</a>
+                    <a href="#connect" class="scribble-button scribble-button-secondary">Get In Touch</a>
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center justify-center">
+                 <div class="scribble-card p-6 w-56 h-56 flex items-center justify-center non-interactive">
+                     <h2 class="font-scribble text-4xl gradient-text">Not Your Average Joe!</h2>
+                 </div>
+            </div>
+        </header>
+        <!-- =================================================================== -->
+        <!-- END HERO SECTION -->
+        <!-- =================================================================== -->
+
+
+        <!-- =================================================================== -->
+        <!-- START MY STORY SECTION -->
+        <!-- =================================================================== -->
+        <section id="story" class="py-24">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
+                
+                <!-- Left Column: Story Text -->
+                <div class="lg:col-span-3">
+                    <span class="scribble-tag">About Me</span>
+                    <h2 class="font-scribble text-5xl mt-4">My Story</h2>
+                    
+                    <!-- EDIT YOUR STORY TEXT HERE -->
+                    <div class="mt-6 text-gray-700 space-y-4 text-base">
+                        <p>
+                            Hey there! I'm Joe, a passionate IT student with a love for all things tech and creative. My journey started with curiosity about how things work behind the scenes, which led me down the rabbit hole of self-hosting and homelab adventures.
+                        </p>
+                        <p>
+                           When I'm not diving deep into Docker containers or setting up new network configurations, you'll find me in the kitchen experimenting with flavors for my entrepreneurial venture, <a href="https://flavorjunkie.co" target="_blank" class="font-bold underline">Flavor Junkie</a>. It's a handcrafted seasoning company where I blend my technical precision with culinary creativity.
+                        </p>
+                        <p>
+                           I believe technology should enhance our lives, and I’m passionate about building systems that are both powerful and accessible. Whether it's troubleshooting a complex network issue or perfecting a new spice blend, I approach every challenge with enthusiasm and attention to detail.
+                        </p>
+                    </div>
+
+                    <!-- EDIT YOUR STORY BULLET POINTS HERE -->
+                     <div class="mt-8 space-y-4">
+                        <div class="story-icon-list-item">
+                            <span class="story-icon-bg"><i data-feather="book-open"></i></span>
+                            <p>Currently studying IT Enterprise Administration.</p>
+                        </div>
+                         <div class="story-icon-list-item">
+                            <span class="story-icon-bg"><i data-feather="home"></i></span>
+                            <p>Self-hosting enthusiast with growing homelab network.</p>
+                        </div>
+                        <div class="story-icon-list-item">
+                            <span class="story-icon-bg"><i data-feather="server"></i></span>
+                            <p>Docker expert with containerized application deployments.</p>
+                        </div>
+                        <div class="story-icon-list-item">
+                            <span class="story-icon-bg"><i data-feather="award"></i></span>
+                            <p>Entrepreneur behind Flavor Junkie handcrafted seasonings.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Stats & Emoji -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="scribble-card p-8 flex justify-center items-center h-48 non-interactive">
+                        <span class="text-8xl">✌🏻</span>
+                    </div>
+                    <h3 class="font-scribble text-4xl text-center">Let's Connect</h3>
+
+                    <!-- EDIT YOUR STATS HERE -->
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="scribble-card p-6 text-center non-interactive">
+                            <p class="text-4xl font-bold gradient-text">15+</p>
+                            <p class="mt-1 font-semibold">Homelab Projects</p>
+                        </div>
+                         <div class="scribble-card p-6 text-center non-interactive">
+                            <p class="text-4xl font-bold gradient-text">3+</p>
+                            <p class="mt-1 font-semibold">Years Learning</p>
+                        </div>
+                         <div class="scribble-card p-6 text-center non-interactive">
+                            <p class="text-4xl font-bold gradient-text">1</p>
+                            <p class="mt-1 font-semibold">Seasoning Company</p>
+                        </div>
+                         <div class="scribble-card p-6 text-center non-interactive">
+                            <p class="text-4xl font-bold gradient-text">10+</p>
+                            <p class="mt-1 font-semibold">Docker Containers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =================================================================== -->
+        <!-- END MY STORY SECTION -->
+        <!-- =================================================================== -->
+
+
+        <!-- =================================================================== -->
+        <!-- START SKILLS SECTION -->
+        <!-- =================================================================== -->
+        <section id="skills" class="py-24">
+            <div class="text-center">
+                <h2 class="font-scribble text-5xl">Skills Arsenal</h2>
+                <p class="mt-4 text-gray-600">Technical expertise meets creative innovation.</p>
+            </div>
+            
+            <!-- Skill Tabs Navigation -->
+            <div class="mt-12 flex justify-center gap-2 md:gap-4 flex-wrap">
+                <button data-tab="technical" class="skill-tab active">Technical</button>
+                <button data-tab="tools" class="skill-tab">Tools</button>
+                <button data-tab="creative" class="skill-tab">Creative</button>
+                <button data-tab="soft" class="skill-tab">Soft Skills</button>
+            </div>
+        
+            <!-- Tab Content Container -->
+            <div class="mt-16 max-w-5xl mx-auto skills-container">
+                <!-- EDIT TECHNICAL SKILLS HERE -->
+                <div id="technical-content" class="skill-content active">
+                    <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                            <i data-feather="terminal" class="w-10 h-10 text-teal-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Linux</h3>
+                                <!-- <span class="proficiency-tag proficiency-advanced">Advanced</span> -->
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Command line & system administration on Ubuntu.</p>
+                    </div>
+                     <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                            <i data-feather="server" class="w-10 h-10 text-teal-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Virtualization</h3>
+                                <!-- <span class="proficiency-tag proficiency-advanced">Advanced</span> -->
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Docker, Docker Compose, and container management.</p>
+                    </div>
+                     <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                            <i data-feather="shield" class="w-10 h-10 text-teal-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Network Security</h3>
+                                <!-- <span class="proficiency-tag proficiency-proficient">Proficient</span> -->
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Firewall & network management with Unifi & NGINX Proxy Manager.</p>
+                    </div>
+                </div>
+        
+                <!-- EDIT TOOLS SKILLS HERE -->
+                <div id="tools-content" class="skill-content">
+                    <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                             <i data-feather="box" class="w-10 h-10 text-blue-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Synology NAS</h3>
+                                <!-- <span class="proficiency-tag proficiency-advanced">Advanced</span> -->
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Data storage, redundancy, and package management.</p>
+                    </div>
+                    <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                            <i data-feather="bar-chart-2" class="w-10 h-10 text-blue-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Grafana</h3>
+                                <!-- <span class="proficiency-tag proficiency-proficient">Proficient</span> -->
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Data visualization & monitoring for homelab services.</p>
+                    </div>
+                    <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                            <i data-feather="globe" class="w-10 h-10 text-blue-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">WordPress</h3>
+                                <!-- <span class="proficiency-tag proficiency-proficient">Proficient</span> -->
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Content management and website administration.</p>
+                    </div>
+                </div>
+        
+                <!-- EDIT CREATIVE SKILLS HERE -->
+                <div id="creative-content" class="skill-content">
+                     <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                            <i data-feather="briefcase" class="w-10 h-10 text-orange-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Entrepreneurship</h3>
+                                <!-- <span class="proficiency-tag proficiency-advanced">Advanced</span> -->
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Founder of Flavor Junkie Seasoning Company.</p>
+                    </div>
+                     <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                            <i data-feather="trending-up" class="w-10 h-10 text-orange-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Digital Marketing</h3>
+                                <!--<span class="proficiency-tag proficiency-proficient">Proficient</span> --> 
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">SEO, Google Analytics, and e-commerce strategy.</p>
+                    </div>
+                </div>
+        
+                <!-- EDIT SOFT SKILLS HERE -->
+                <div id="soft-content" class="skill-content">
+                    <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                           <i data-feather="tool" class="w-10 h-10 text-red-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Problem-Solving</h3>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Diagnosing and resolving complex technical issues efficiently.</p>
+                    </div>
+                    <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                           <i data-feather="clipboard" class="w-10 h-10 text-red-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Project Management</h3>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Overseeing projects from conception to completion.</p>
+                    </div>
+                     <div class="scribble-card p-6 non-interactive">
+                        <div class="flex items-center gap-4">
+                           <i data-feather="users" class="w-10 h-10 text-red-500"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Communication</h3>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-gray-600">Clearly conveying technical details to all audiences.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =================================================================== -->
+        <!-- END SKILLS SECTION -->
+        <!-- =================================================================== -->
+
+
+        <!-- =================================================================== -->
+        <!-- START WORK EXPERIENCE SECTION -->
+        <!-- =================================================================== -->
+        <main id="experience" class="Content py-24">
+             <div class="text-center">
+                <h2 class="font-scribble text-5xl">Work Experience</h2>
+                <p class="mt-4 text-gray-600">My journey so far.</p>
+            </div>
+            
+            <div class="Content__inner mt-16">
+                <!-- Card 1: EDIT YOUR INFO HERE -->
+                <div class="Content__wrapper">
+                    <div class="Content__slide card-bg-1">
+                        <span class="scribble-tag bg-white/50 flex-shrink-0">Present</span>
+                        <h3 class="text-3xl font-bold mt-4">IT & Homelab Administrator</h3>
+                        <p class="text-xl font-semibold text-gray-700">Personal Project | Edmond, OK</p>
+                        <ul class="mt-6 text-gray-800 space-y-3 experience-list text-lg">
+                            <li>Designed, built, and maintained a robust homelab environment (Ubuntu, Dell Optiplex, Raspberry Pi, Synology NAS).</li>
+                            <li>Implemented and managed containerized applications using Docker, Docker Compose, and Dockge.</li>
+                            <li>Configured and secured network infrastructure with NGINX Proxy Manager and wildcard SSL.</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Card 2: EDIT YOUR INFO HERE -->
+                <div class="Content__wrapper">
+                    <div class="Content__slide card-bg-2">
+                        <span class="scribble-tag bg-white/50 flex-shrink-0">2020 - 2025</span>
+                        <h3 class="text-3xl font-bold mt-4">Independent Distributor</h3>
+                        <p class="text-xl font-semibold text-gray-700">Pepperidge Farms | Oklahoma City, OK</p>
+                        <ul class="mt-6 text-gray-800 space-y-3 experience-list text-lg">
+                           <li>Managed end-to-end logistical operations including inventory and supply chain.</li>
+                           <li>Utilized operational software (OmniTech Sales) for order processing and sales tracking.</li>
+                           <li>Increased value of distribution route by 20% through efficient management.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <!-- Card 3: EDIT YOUR INFO HERE -->
+                <div class="Content__wrapper">
+                    <div class="Content__slide card-bg-3">
+                        <span class="scribble-tag bg-white/50 flex-shrink-0">2020 - Present</span>
+                        <h3 class="text-3xl font-bold mt-4">Founder & CEO</h3>
+                        <p class="text-xl font-semibold text-gray-700">Flavor Junkie Seasoning Co.</p>
+                        <ul class="mt-6 text-gray-800 space-y-3 experience-list text-lg">
+                            <li>Managed all operational aspects (supply chain, inventory, fulfillment) of a D2C business.</li>
+                            <li>Leveraged digital platforms for marketing and sales, gaining e-commerce experience.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <!-- Card 4: EDIT YOUR INFO HERE -->
+                 <div class="Content__wrapper">
+                    <div class="Content__slide card-bg-4">
+                        <span class="scribble-tag bg-white/50 flex-shrink-0">2014 - 2018</span>
+                        <h3 class="text-3xl font-bold mt-4">IT Specialist Tier II</h3>
+                        <p class="text-xl font-semibold text-gray-700">University of Central Oklahoma</p>
+                        <ul class="mt-6 text-gray-800 space-y-3 experience-list text-lg">
+                           <li>Managed IT team to offer successful solutions for clients' technical issues.</li>
+                           <li>Provided exceptional customer service, troubleshooting, and user support.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- =================================================================== -->
+        <!-- END WORK EXPERIENCE SECTION -->
+        <!-- =================================================================== -->
+
+
+        <!-- =================================================================== -->
+        <!-- START EDUCATION SECTION -->
+        <!-- =================================================================== -->
+        <section id="education" class="py-24">
+             <div class="scribble-card p-8 md:p-12 non-interactive">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <!-- EDIT EDUCATION INFO HERE -->
+                    <div>
+                        <h2 class="font-scribble text-4xl mb-4">Education</h2>
+                        <h3 class="text-xl font-bold">Bachelor Degree in Marketing</h3>
+                        <p class="text-lg font-semibold text-gray-700">University of Central Oklahoma | 2014-2018</p>
+                        <p class="mt-1 text-gray-600">Minor in Business Administration</p>
+                    </div>
+                    <!-- EDIT CERTIFICATIONS INFO HERE -->
+                    <div>
+                        <h2 class="font-scribble text-4xl mb-4">Certifications</h2>
+                        <ul class="space-y-2 experience-list">
+                            <li>Digital Marketing Course by Google</li>
+                            <li>Google Analytics & Google Tag Manager</li>
+                            <li>SEO Fundamentals by SEMrush</li>
+                        </ul>
+                    </div>
+                </div>
+             </div>
+        </section>
+        <!-- =================================================================== -->
+        <!-- END EDUCATION SECTION -->
+        <!-- =================================================================== -->
+
+
+        <!-- =================================================================== -->
+        <!-- START CONTACT SECTION -->
+        <!-- =================================================================== -->
+        <section id="connect" class="py-24">
+             <div class="scribble-card p-8 md:p-12">
+                 <div class="text-center">
+                    <h2 class="font-scribble text-5xl">Let's Connect!</h2>
+                    <p class="mt-4 text-gray-600 max-w-lg mx-auto">Have a project in mind, or just want to say hi? Send me a message or find me online.</p>
+                </div>
+                <form class="mt-12 max-w-xl mx-auto">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <input type="text" placeholder="Your Name" class="scribble-input w-full">
+                        <input type="email" placeholder="Your Email" class="scribble-input w-full">
+                    </div>
+                    <textarea placeholder="Your Message" rows="5" class="scribble-input w-full mt-6"></textarea>
+                    <div class="text-center mt-8">
+                        <button type="submit" class="scribble-button scribble-button-primary">Send Message</button>
+                    </div>
+                </form>
+             </div>
+        </section>
+        <!-- =================================================================== -->
+        <!-- END CONTACT SECTION -->
+        <!-- =================================================================== -->
+
+
+        <!-- =================================================================== -->
+        <!-- START FOOTER SECTION -->
+        <!-- =================================================================== -->
+        <footer class="text-center mt-16 py-8 border-t-2 border-dashed border-gray-300">
+            <!-- EDIT FOOTER INFO HERE -->
+            <p class="font-semibold">Joe Biby</p>
+            <a href="mailto:jbiby1996@gmail.com" class="text-gray-600 hover:text-black">jbiby1996@gmail.com</a>
+             <div class="mt-4 flex justify-center gap-6">
+                <a href="https://uravgjoe.com" target="_blank" class="text-gray-500 transition-all duration-200 footer-icon" aria-label="Website"><i data-feather="link"></i></a>
+                <a href="#" class="text-gray-500 transition-all duration-200 footer-icon" aria-label="LinkedIn"><i data-feather="linkedin"></i></a>
+                <a href="#" class="text-gray-500 transition-all duration-200 footer-icon" aria-label="GitHub"><i data-feather="github"></i></a>
+            </div>
+        </footer>
+        <!-- =================================================================== -->
+        <!-- END FOOTER SECTION -->
+        <!-- =================================================================== -->
+
+    </div>
+    
+
+    <!-- GSAP Animation Library -->
+    <script src='https://unpkg.co/gsap@3/dist/gsap.min.js'></script>
+    <script src='https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js'></script>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- SCRIPT FOR SKILL TABS ---
+            const tabs = document.querySelectorAll('.skill-tab');
+            const contents = document.querySelectorAll('.skill-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    const tabName = tab.dataset.tab;
+                    document.getElementById(`${tabName}-content`).classList.add('active');
+                });
+            });
+
+            // --- GSAP ANIMATIONS ---
+            gsap.registerPlugin(ScrollTrigger);
+
+            // 1. SCROLLING CARDS for Experience Section
+            const slideWrappers = gsap.utils.toArray(".Content__wrapper");
+            const slides = gsap.utils.toArray(".Content__slide");
+
+            let mm = gsap.matchMedia();
+
+            mm.add("(min-width: 1200px) and (prefers-reduced-motion: no-preference)", () => {
+                slideWrappers.forEach((wrapper, i) => {
+                  const card = slides[i];
+                  let scale = 1, rotationZ = 0, rotationX = 0;
+
+                  if (i !== slides.length - 1) {
+                    scale = 0.85 - 0.05 * i;
+                    rotationZ = 0;
+                    rotationX = 40;
+                  }
+
+                  gsap.to(card, {
+                    scale, rotationX, rotationZ,
+                    transformOrigin: "50% center",
+                    ease: "none",
+                    scrollTrigger: {
+                      trigger: wrapper,
+                      start: "top top",
+                      end: "bottom bottom",
+                      endTrigger: slides[slides.length - 1],
+                      scrub: 1,
+                      pin: wrapper,
+                      pinSpacing: false,
+                    }
+                  });
+                });
+            });
+            
+            // 2. HERO SECTION animation on page load
+            gsap.from('header .lg\\:col-span-2 > *', {
+                duration: 0.8,
+                y: 40,
+                opacity: 0,
+                stagger: 0.15,
+                ease: 'power3.out'
+            });
+
+            // 3. "MY STORY" SECTION animation on scroll
+            gsap.from('#story .lg\\:col-span-3 > *', {
+                scrollTrigger: { trigger: '#story', start: 'top 80%', toggleActions: 'play none none reverse' },
+                duration: 0.8, x: -40, opacity: 0, stagger: 0.15, ease: 'power3.out'
+            });
+            gsap.from('#story .lg\\:col-span-2 > *', {
+                scrollTrigger: { trigger: '#story', start: 'top 80%', toggleActions: 'play none none reverse' },
+                duration: 0.8, scale: 0.9, opacity: 0, stagger: 0.15, ease: 'back.out(1.7)'
+            });
+
+            // 4. SECTION TITLES animation on scroll
+            const sectionTitles = gsap.utils.toArray('.font-scribble.text-5xl');
+            sectionTitles.forEach(title => {
+                if (title.closest('header')) return; // Skip hero title
+                gsap.from(title, {
+                    scrollTrigger: { trigger: title, start: 'top 90%', toggleActions: 'play none none reverse' },
+                    duration: 1, y: 30, opacity: 0, ease: 'power3.out'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
